@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ms.ems.dtos.CreateEmployeeRequest;
 import com.ms.ems.dtos.ProjectRequest;
 import com.ms.ems.dtos.SkillRequest;
+import com.ms.ems.dtos.UpdateEmployeeRequest;
 import com.ms.ems.entities.Employee;
 import com.ms.ems.services.EmployeeService;
 
@@ -38,13 +40,13 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Employee> create(@Valid @RequestBody Employee employee) {
-        return ResponseEntity.ok(service.createEmployee(employee));
+    public ResponseEntity<Employee> create(@Valid @RequestBody CreateEmployeeRequest request) {
+        return ResponseEntity.ok(service.createEmployee(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> update(@PathVariable Long id, @Valid @RequestBody Employee employee) {
-        return ResponseEntity.ok(service.updateEmployee(id, employee));
+    public ResponseEntity<Employee> update(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeRequest request) {
+        return ResponseEntity.ok(service.updateEmployee(id, request));
     }
 
     @DeleteMapping("/{id}")

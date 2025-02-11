@@ -1,5 +1,7 @@
 package com.ms.ems.services;
 
+import com.ms.ems.dtos.CreateEmployeeRequest;
+import com.ms.ems.dtos.UpdateEmployeeRequest;
 import com.ms.ems.entities.Employee;
 import com.ms.ems.exceptions.DuplicateEmailException;
 import com.ms.ems.exceptions.EmployeeNotFoundException;
@@ -14,6 +16,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -35,27 +38,42 @@ public class EmployeeService {
     }
 
     @CachePut(value = "employees", key = "#result.id")
-    public Employee createEmployee(Employee employee) {
-        if (repository.findByEmail(employee.getEmail()).isPresent())
-            throw new DuplicateEmailException("Email exists: " + employee.getEmail());
-        log.info("Saving new employee: {}", employee.getEmail());
+    public Employee createEmployee(CreateEmployeeRequest request) {
+        if (repository.findByEmail(request.getEmail()).isPresent())
+            throw new DuplicateEmailException("Email exists: " + request.getEmail());
+
+        Employee employee = new Employee();
+        employee.setName(request.getName());
+        employee.setEmail(request.getEmail());
+        employee.setRole(request.getRole());
+        employee.setDepartment(request.getDepartment());
+        employee.setSkills(request.getSkills() != null ? request.getSkills() : new HashSet<>());
+        employee.setAssignedProjects(
+                request.getAssignedProjects() != null ? request.getAssignedProjects() : new HashSet<>());
+
         return repository.save(employee);
     }
 
     @CachePut(value = "employees", key = "#id")
-    public Employee updateEmployee(Long id, Employee updated) {
+    public Employee updateEmployee(Long id, UpdateEmployeeRequest request) {
         Employee existing = getEmployeeById(id);
-        if (updated.getName() != null)
-            existing.setName(updated.getName());
-        if (updated.getEmail() != null && !updated.getEmail().equals(existing.getEmail())) {
-            if (repository.findByEmail(updated.getEmail()).isPresent())
-                throw new DuplicateEmailException("Email exists: " + updated.getEmail());
-            existing.setEmail(updated.getEmail());
+
+        if (request.getName() != null)
+            existing.setName(request.getName());
+        if (request.getEmail() != null && !request.getEmail().equals(existing.getEmail())) {
+            if (repository.findByEmail(request.getEmail()).isPresent())
+                throw new DuplicateEmailException("Email exists: " + request.getEmail());
+            existing.setEmail(request.getEmail());
         }
-        if (updated.getRole() != null)
-            existing.setRole(updated.getRole());
-        if (updated.getDepartment() != null)
-            existing.setDepartment(updated.getDepartment());
+        if (request.getRole() != null)
+            existing.setRole(request.getRole());
+        if (request.getDepartment() != null)
+            existing.setDepartment(request.getDepartment());
+        if (request.getSkills() != null)
+            existing.setSkills(request.getSkills());
+        if (request.getAssignedProjects() != null)
+            existing.setAssignedProjects(request.getAssignedProjects());
+
         return repository.save(existing);
     }
 
