@@ -15,29 +15,21 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Employee implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Name is mandatory")
     private String name;
-
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Invalid email format")
     private String email;
-
-    @NotBlank(message = "Role is mandatory")
     private String role;
-
-    @NotBlank(message = "Department is mandatory")
     private String department;
 
-    @ElementCollection
-    private Set<String> skills = new HashSet<>();
+    @ManyToMany
+    @JoinTable(name = "employee_skills", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    private Set<SkillSets> skills;
 
-    @ElementCollection
-    private Set<String> assignedProjects = new HashSet<>();
+    @ManyToMany
+    @JoinTable(name = "employee_projects", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "project_id"))
+    private Set<Projects> projects;
 }
