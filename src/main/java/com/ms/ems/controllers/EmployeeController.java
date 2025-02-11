@@ -45,4 +45,16 @@ public class EmployeeController {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{employeeId}/skills/{skillId}")
+    public ResponseEntity<Void> addSkillToEmployee(@PathVariable Long employeeId, @PathVariable Long skillId) {
+        employeeService.addSkillToEmployee(employeeId, skillId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{employeeId}/projects/{projectId}")
+    public ResponseEntity<Void> addProjectToEmployee(@PathVariable Long employeeId, @PathVariable Long projectId) {
+        employeeService.addProjectToEmployee(employeeId, projectId);
+        return ResponseEntity.ok().build();
+    }
 }
