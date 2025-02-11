@@ -1,77 +1,48 @@
 package com.ms.ems.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ms.ems.dtos.CreateEmployeeRequest;
-import com.ms.ems.dtos.ProjectRequest;
-import com.ms.ems.dtos.SkillRequest;
-import com.ms.ems.dtos.UpdateEmployeeRequest;
 import com.ms.ems.entities.Employee;
 import com.ms.ems.services.EmployeeService;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/employees")
-@RequiredArgsConstructor
 public class EmployeeController {
 
-    private final EmployeeService service;
+    @Autowired
+    private EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<List<Employee>> getAll() {
-        return ResponseEntity.ok(service.getAllEmployees());
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Employee> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getEmployeeById(id));
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Optional<Employee> employee = employeeService.getEmployeeById(id);
+        return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Employee> create(@Valid @RequestBody CreateEmployeeRequest request) {
-        return ResponseEntity.ok(service.createEmployee(request));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Employee> update(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeRequest request) {
-        return ResponseEntity.ok(service.updateEmployee(id, request));
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeService.saveEmployee(employee);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteEmployee(id);
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/skills")
-    public ResponseEntity<Employee> addSkill(@PathVariable Long id, @Valid @RequestBody SkillRequest request) {
-        return ResponseEntity.ok(service.addSkill(id, request.getSkill()));
-    }
-
-    @DeleteMapping("/{id}/skills/{skill}")
-    public ResponseEntity<Employee> removeSkill(@PathVariable Long id, @PathVariable String skill) {
-        return ResponseEntity.ok(service.removeSkill(id, skill));
-    }
-
-    @PostMapping("/{id}/projects")
-    public ResponseEntity<Employee> assignProject(@PathVariable Long id, @Valid @RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(service.assignProject(id, request.getProject()));
-    }
-
-    @DeleteMapping("/{id}/projects/{project}")
-    public ResponseEntity<Employee> unassignProject(@PathVariable Long id, @PathVariable String project) {
-        return ResponseEntity.ok(service.unassignProject(id, project));
     }
 }
